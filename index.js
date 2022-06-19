@@ -1,20 +1,31 @@
 var http = require('http');
 var fs = require('fs');
+const CatLoggr = require('cat-loggr');
 
-const logger = require('cat-loggr');
+const logger = new CatLoggr();
+
+
+logger.info("Starting Message Server");
 
 http.createServer(function (req, res) {
 	//change the MIME type to 'application/json' 
     res.writeHead(200, {'Content-Type': 'application/json'});
-    logger.log('Hello, world!');
-    //Create a JSON
-	let json_response = {
-		status : 200 , 
-		message : 'succssful' , 
-		result : [ 'sunday' , 'monday' , 'tuesday' , 'wednesday' ] , 
-		code : 2000
-	}
 
-	res.end( JSON.stringify(json_response) ); 
+	fs.readFile('message.txt', 'utf8', (err, data) => {
+		if (err) {
+			return console.log(err);
+		}
+		let json_response = {
+			status : 200 , 
+			Message : data,
+			code : 200
+		}
+
+		logger.info(`Serving message to ${req.connection.remoteAddress.split(':')[3]}`);
+
+		res.end(JSON.stringify(json_response)); 
+		
+	});
+
 
 }).listen(3000);
